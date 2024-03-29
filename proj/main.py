@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import sqlite3
 import sys
 from fasFrontend import FAS
 from fasController import financialReq
@@ -19,6 +20,8 @@ class SGLG:
                         'Surigao Del Sur': {'g': 'Lynn', 'h': 'Jane', 'i': 'Jay'},
                         'Surigao Del Norte': {'j': 'Lynn', 'k': 'Jane', 'l': 'Jay'},
                         'Province of Dinagat Islands': {'m': 'Lynn', 'n': 'Jane', 'o': 'Jay'}}
+        self.conn = sqlite3.connect('SGLG.db')
+        self.cursor = self.conn.cursor()
         
     def clear(self, e):
         window['PROVINCE'].update('')
@@ -28,33 +31,58 @@ class SGLG:
         window["FAS_FRAME"].update(visible=False)
         window["DP_FRAME"].update(visible=False)
 
-    def get_municipalities(self, province):
+    #def get_municipalities(self, province):
         #print(self.income_class)
-        if province in self.data:
-            return self.data[province]
-        else:
-            return None
+        #if province in self.data:
+            #return self.data[province]
+        #else:
+            #return None
         
-    def get_cm(self, mun):
-        print("municipality function")
-        cm = ''
-        for i in self.incomeClass:
-            if mun in self.incomeClass[i]:
-                cm = i
-                print(mun, "is", cm)
-        return cm
+    def get_municipalities(self, province):
+        query = "SELECT MName FROM MUNICIPALITY INNER JOIN PROVINCE ON MUNICIPALITY.pID = PROVINCE.pID WHERE PName = ?"
+        self.cursor.execute(query, (province,))
+        municipalities = self.cursor.fetchall()
+        return [m[0] for m in municipalities]
+        
+    #def get_cm(self, mun):
+    #    print("municipality function")
+    #    cm = ''
+    #    for i in self.incomeClass:
+    #        if mun in self.incomeClass[i]:
+    #            cm = i
+    #            print(mun, "is", cm)
+    #    return cm
                 
-    def get_fo(self, mun, province):
-        print(mun, "this is for get_fo function")
-        print(province, "this is for get_fo function")
-        field_officer = self.fieldOfficers.get(province, {}).get(mun)
-        if field_officer:
-            print(field_officer)
-            return field_officer
+    #def get_fo(self, mun, province):
+    #    print(mun, "this is for get_fo function")
+    #    print(province, "this is for get_fo function")
+    #    field_officer = self.fieldOfficers.get(province, {}).get(mun)
+    #    if field_officer:
+    #        print(field_officer)
+    #        return field_officer
+    #    else:
+    #        print("No Field Officer")
+
+
+    def get_cm(self, mun):
+        query = "SELECT icName FROM INCOMECLASS WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
+        self.cursor.execute(query, (mun,))
+        cm = self.cursor.fetchone()
+        if cm:
+            return cm[0]
         else:
-            print("No Field Officer")
+            return "Error. No income class."
+
+    def get_fo(self, mun, province):
+        query = "SELECT foName FROM FIELD_OFFICERS WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?) AND pID IN (SELECT pID FROM PROVINCE WHERE PName = ?)"
+        self.cursor.execute(query, (mun, province))
+        fo = self.cursor.fetchone()
+        if fo:
+            return fo[0]
+        else:
+            return "Error. No field officer."
         
-    def emptyLocality():
+    def emptyLocality(self):
         if values['PROVINCE'] == "":
             sg.PopupError('Please Select Province!')
         elif values['CM'] == "":
@@ -64,13 +92,19 @@ class SGLG:
         elif values['FIELD_OFFICER'] == "":
             sg.PopupError('Empty Field Officer. Please select Province first!')
         else:
-            cat1_1 = financialReq.controllerFinancialReq(province, cm)
+            frInstance = financialReq(self.conn)
+            cat1_1 = frInstance.controllerFinancialReq(province, cm)
             if cat1_1 == True:
                 window["FAS_FRAME"].update(visible=True)
                 window["DP_FRAME"].update(visible=False)
+            else:
+                print(cat1_1, "this is else after controllerFinancialReq was called in emptyLocality\n")
 
     def unEmptyLocality(province, cm):
         print(province, cm, "this is from unEmptyLocality")
+
+    def close_connection(self):
+        self.conn.close()
         
 
 
@@ -86,6 +120,12 @@ sg.LOOK_AND_FEEL_TABLE['Theme'] = {'BACKGROUND': '#292929',
 sg.theme("Default1")
 sg.set_options(font=("yu Gothic u1",10))
 
+
+#INSTANCES
+sglg_instance = SGLG()
+
+# Access the conn attribute
+conn = sglg_instance.conn
 
 #VARIABLES FOR IMAGES SECTION
 dilg_logo = [[sg.Image("logo_FINAL1.png")]]
@@ -142,7 +182,7 @@ left_column = [
 layout = [
     [sg.Frame("",[[sg.Column(dilg_logo),sg.Column(sglg_logo),sg.Column(header_frame)]],expand_x=True,element_justification="c")],
     [sg.Column(left_column,expand_x=True),
-    sg.Frame("Financial Administration and Sustainability",FAS(),expand_y=True,key="FAS_FRAME",visible=False,font=("Courier New",13),title_color="#00075B"),
+    sg.Frame("Financial Administration and Sustainability",FAS(conn),expand_y=True,key="FAS_FRAME",visible=False,font=("Courier New",13),title_color="#00075B"),
      sg.Frame("Disaster Preparedness",DP(),key="DP_FRAME",visible=False,expand_y=True,font=("Courier New",13)),
      sg.Frame("Minimum Requirements",mr(),visible=False,key="MR",expand_y=True,title_color="Green",font=("Courier New",13))]
 ]
@@ -170,7 +210,8 @@ while True:
         a = SGLG.clear("",event)
     if event == "1":
         cm = values["CM"]
-        cat1 = SGLG.emptyLocality()
+        sglgInstance = SGLG()
+        cat1 = sglgInstance.emptyLocality()
     if event == "2":
         cat1 = SGLG.emptyLocality()
 
@@ -190,10 +231,18 @@ while True:
         province = values['PROVINCE']
         result_mun = municipalities.get_municipalities(province)
         if result_mun:
-            print(result_mun)
             window["CM"].update(values=result_mun)
         else:
-            print("Province not Found.")
+            sg.popup("Province not Found.")
+
+        #municipalities = SGLG()
+        #province = values['PROVINCE']
+        #result_mun = municipalities.get_municipalities(province)
+        #if result_mun:
+        #    print(result_mun)
+        #    window["CM"].update(values=result_mun)
+        #else:
+        #    print("Province not Found.")
 
 #City/Municipality
     if event == "CM":
@@ -215,9 +264,12 @@ while True:
         else:
             print("Error. No field officer.")
 
-# FAS SECTION
+# FAS 1.1 SECTION
     if event == "Unmodified":
-        cat1_1 = financialReq.handle_unmodified(event, values)
+        fo = values['FIELD_OFFICER']
+        print(cm, fo, "kuan ni")
+        #fr_instance = financialReq()
+        cat1_1 = financialReq.handle_unmodified(event, values, cm, fo)
     elif event == "Qualified":
         cat1_1 = financialReq.handle_qualified(event, values)
     elif event == "ADVERSE":
@@ -242,4 +294,13 @@ while True:
         cat1_1 = financialReq.handle_notok3(event, values)
     else:
         print("fas section main not working")
+
+#FAS 1.1 INPUT TEXT SECTION
+    if event == "COA_RECOMMENDATION":
+        coa_recommendation = window["COA_RECOMMENDATION"].get()
+        res = financialReq.handle_coaRecommendation(event, coa_recommendation)
+        print(res, coa_recommendation, event,  "this is from main event function coa recommendation\n")
+        print("this is main from coa recomendation\n")
+    else:
+        print("COA RECOMMENDATION EVENT IS NOT WORKING")
         

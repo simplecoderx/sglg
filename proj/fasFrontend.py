@@ -4,9 +4,9 @@ import PySimpleGUI as sg
 import sys
 from fasController import financialReq
 
-def FAS():
+def FAS(conn):
 
-    cat1_1 = financialReq()
+    cat1_1 = financialReq(conn)
 
 #1.1 SECTION    
     main_1 = [
@@ -20,9 +20,9 @@ def FAS():
         [sg.Radio("Disclaimer/No Opinion", "RADIO1", key="DNO",size=29, enable_events=True)],
         [sg.Radio("No Annual Audit Report", "RADIO1", key="NAAR",size=29, enable_events=True)]
     ]
-
-    sub_2 = [[sg.Text(cat1_1.displaySubHeadings(1),size=(40,2)),
-              sg.InputText(key="COA_RECOMMENDATION",size=30,justification="c")]]
+    coa_recommendation = []
+    sub_2 = [[sg.Text(cat1_1.displaySubHeadings(1), size=(40,2)), 
+          sg.InputText(key="COA_RECOMMENDATION", size=30, enable_events=True, justification="c")]]
     sub_3 = [[sg.Text(cat1_1.displaySubHeadings(2),size=(40,5)),
               sg.Combo(["Yes","No"],key="TYPO",size=10,enable_events=True)]]
     mov = [[sg.Text("if YES, upload submitted document/s",size=(40,1)),

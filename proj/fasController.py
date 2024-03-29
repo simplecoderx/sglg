@@ -1,5 +1,12 @@
+import sqlite3
+
+conn2 = sqlite3.connect('SGLG.db')
+cursor = conn2.cursor()
+
 class financialReq():
-    def __init__(self) -> None:
+    def __init__(self, conn) -> None:
+        self.conn = conn
+        self.cursor = self.conn.cursor()
         self.mainHeadings = ("1.1 Most recent audit opinion is unmodified or qualified plus 30% of recommendations fully complied with",
                         "1.2 The LGU fully complied with posting in (please tick all applicable items)",
                         "1.3 Average local revenue growth of LGU from CYs 2020 to 2022 (please supply information)",
@@ -37,44 +44,77 @@ class financialReq():
     def displaySectionFiveSubHeadings(self, val):
         return self.sectionFiveSubHeadings[val]
     
-    def controllerFinancialReq(province, cm):
-        munWithFinancialReq = ("Nasipit", "Butuan City", "Carmen")
+    def controllerFinancialReq(self, province, cm):
+        """ munWithFinancialReq = ("Nasipit", "Butuan City", "Carmen")
         for i in munWithFinancialReq:
             if cm in munWithFinancialReq:
                 print(province, cm, "this is from unEmptyLocality of controllerFinancialRe fass")
                 return True
             else:
-                return False
+                return False """
+        print("its working")
+        query = "SELECT COUNT(*) FROM CATEGORIES WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
+        self.cursor.execute(query, (cm,))
+        count = self.cursor.fetchone()[0]
+        return count > 0
             
-    def handle_unmodified(e, values):
-        print(e, values["Unmodified"])
+    def handle_unmodified(e, val, cm, fo):
+        print(e, val["Unmodified"], cm, fo)
+        unmodified_value = val.get("Unmodified")  # Get the value from the Unmodified radio button
+        print(e, unmodified_value, cm, fo)
+        # Add your logic here for handling the Unmodified event
+        query = "INSERT INTO FINANCIAL_AD_ANS (auditOpinion) VALUES (?)"
+        cursor.execute(query, (unmodified_value,))
+        print("Successfully inserted into the table.")
+        conn2.commit()
+
+    def handle_qualified(e, val):
+        print(e, val["Qualified"])
         # Add your logic here for handling the Unmodified event
 
-    def handle_qualified(e, values):
-        print(e, values["Qualified"])
-        # Add your logic here for handling the Unmodified event
-
-    def handle_dno(e, values):
-        print(e, values["Qualified"])
-    def handle_adverse(e, values):
-        print(e, values["Qualified"])        
-    def handle_naar(e, values):
-        print(e, values["Qualified"])        
-    def handle_upload(e, values):
-        print(e, values["Qualified"])        
-    def handle_typo(e, values):
-        print(e, values["Qualified"])        
-    def handle_ok1(e, values):
-        print(e, values["Qualified"])        
-    def handle_ok2(e, values):
-        print(e, values["Qualified"])        
-    def handle_notok1(e, values):
-        print(e, values["Qualified"])        
-    def handle_notok2(e, values):
-        print(e, values["Qualified"])        
-    def handle_notok3(e, values):
+    def handle_dno(e, val):
+        print(e, val["DNO"])
 
 
+    def handle_adverse(e, val):
+        print(e, val["ADVERSE"]) 
+
+
+    def handle_naar(e, val):
+        print(e, val["NAAR"])   
+
+
+    def handle_upload(e, val):
+        print(e, val["UPLOAD"]) 
+
+
+    def handle_typo(e, val):
+        print(e, val["TYPO"])  
+
+
+    def handle_ok1(e, val):
+        print(e, val["OK1"])  
+
+
+    def handle_ok2(e, val):
+        print(e, val["OK2"])   
+
+
+    def handle_notok1(e, val):
+        print(e, val["NOTOK1"]) 
+
+
+    def handle_notok2(e, val):
+        print(e, val["NOTOK2"])
+
+
+    def handle_notok3(e, val):
+        print(e, val["NOTOK3"]) 
+
+    def handle_coaRecommendation(e, val):
+        print(e, val) 
+        coa_recommendation = val
+        return coa_recommendation
 
 """     def unEmptyLocality(province, cm):
         print(province, cm, "this is from unEmptyLocality of fass") """
