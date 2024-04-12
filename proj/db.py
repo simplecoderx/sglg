@@ -37,7 +37,7 @@ cursor = conn.cursor()
                   FOREIGN KEY (cID) REFERENCES CATEGORIES(cID))''') """
 
 # Create FINANCIAL ADMINISTRATION AND SUSTAINABILITY table
-cursor.execute('''CREATE TABLE FINANCIAL_AD_ANS (
+""" cursor.execute('''CREATE TABLE FINANCIAL_AD_ANS (
     faID INTEGER PRIMARY KEY,
     auditOpinion TEXT CHECK(length(auditOpinion) <= 100),
     lguPosting TEXT CHECK(length(lguPosting) <= 200),
@@ -53,7 +53,21 @@ cursor.execute('''CREATE TABLE FINANCIAL_AD_ANS (
     FOREIGN KEY (fo_id) REFERENCES FieldOfficers(foID),
     FOREIGN KEY (mun_id) REFERENCES Municipality(mID),
     FOREIGN KEY (c_id) REFERENCES Categories(cID)
-    )''') 
+    )''')  """
+
+#CREATE USERS TABLE
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS USERS (
+        UId INTEGER PRIMARY KEY,    -- Unique identifier for each user
+        UName TEXT NOT NULL,        -- Username, required and of type text
+        Password TEXT NOT NULL,     -- Password, required and of type text
+        provinceId INTEGER,                -- Foreign key to the parent table
+        municipalityId INTEGER,                -- Foreign key to the mentor table
+        FOREIGN KEY (provinceId) REFERENCES PROVINCE(pID),  -- Foreign key constraint referencing PARENT_TABLE and PId
+        FOREIGN KEY (municipalityId) REFERENCES MUNICIPALITY(mID)   -- Foreign key constraint referencing MENTOR_TABLE and MId
+    )
+''')
+
 
 # Commit changes to the database
 conn.commit()

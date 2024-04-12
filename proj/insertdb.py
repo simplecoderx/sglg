@@ -34,7 +34,7 @@ cursor = conn.cursor()
 
 # Insert data into the FINANCIAL ADMINISTRATION AND SUSTAINABILITY table
 #cursor.execute("INSERT INTO MINIMUMREQUIREMENTS (faID, auditOpinion, lguPosting, dataTYPO, aveLocalRevGrowth, ntaUtilization, performanceChallengeFund, upload, lguPCFradioBtn, fo_id, mun_id, c_id) VALUES ('Requirement1', 1)")
-cursor.execute('''
+""" cursor.execute('''
     INSERT INTO FINANCIAL_AD_ANS (
         faID, 
         auditOpinion, 
@@ -66,7 +66,12 @@ cursor.execute('''
     'Lynn',                # foName (String)
     'Carmen',              # MName (String)
     "1. Financial Administration and Sustainability"                   # cName (String)
-))
+)) """
+
+
+#Insert data to Users
+cursor.execute("INSERT INTO USERS (UName, Password, provinceId, municipalityId) VALUES ('Carmen', '123', 1, 2)")
+
 
 # Add more INSERT statements for other FINANCIAL ADMINISTRATION AND SUSTAINABILITY table
 

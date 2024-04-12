@@ -6,6 +6,12 @@ from fasController import financialReq
 from DP import DP
 from minimum_requirements import mr
 
+#
+arguments = sys.argv
+UId = arguments[1] if len(arguments) > 1 else None
+pID = arguments[2] if len(arguments) > 2 else None
+mID = arguments[3] if len(arguments) > 3 else None
+
 #ACTIONS SECTION
 class SGLG:
     def __init__(self) -> None:
@@ -22,6 +28,91 @@ class SGLG:
                         'Province of Dinagat Islands': {'m': 'Lynn', 'n': 'Jane', 'o': 'Jay'}}
         self.conn = sqlite3.connect('SGLG.db')
         self.cursor = self.conn.cursor()
+
+    def getProvince(self, pName):
+        # Define the query
+        pquery = "SELECT Pname FROM province WHERE pID = ?"
+        
+        # Execute the query with the given pID
+        self.cursor.execute(pquery, (pID,))
+        
+        # Fetch one result (a tuple) from the query
+        result = self.cursor.fetchone()
+        
+        # Check if result is not None and print the province name
+        if result is not None:
+            # Extract the first element of the tuple (the province name)
+            pName = result[0]
+            
+            # Print the province name
+            print(pName)
+            
+            # Return the province name
+            return pName
+        else:
+            print(f"No province found with pID: {pID}")
+            return None
+        
+
+    def getMunicipality(self, mName):
+        checker = "SELECT COUNT(*) FROM municipality WHERE pID = ? AND mID = ?"
+        self.cursor.execute(checker, (pID, mID))
+            
+        # Fetch the count result from the query
+        count = self.cursor.fetchone()[0]
+        if count > 0:
+            # Define the query
+            pquery = "SELECT Mname FROM municipality WHERE mID = ?"
+            
+            # Execute the query with the given pID
+            self.cursor.execute(pquery, (mID,))
+            
+            # Fetch one result (a tuple) from the query
+            result = self.cursor.fetchone()
+            
+            # Check if result is not None and print the province name
+            if result is not None:
+                # Extract the first element of the tuple (the province name)
+                mName = result[0]
+                icquery = "SELECT icName FROM incomeclass WHERE mID = ?"
+                self.cursor.execute(icquery, (mID,))
+                # Print the province name
+                print(mName)
+                
+                # Return the province name
+                return mName
+        else:
+            print("Not part of that province")
+
+        """ pquery = "SELECT Pname FROM province WHERE pID = ?"
+        self.cursor.execute(pquery, (pID,))
+        pName = self.cursor.fetchone()
+        return pName """
+        """ pquery = "SELECT Pname FROM province WHERE pID = ?"
+        mquery = "SELECT Mname FROM municipality WHERE mID = ?"
+        self.cursor.execute(pquery, (pID,))
+        self.cursor.execute(mquery, (mID,))
+        pName = self.cursor.fetchone()
+        mName = self.cursor.fetchone() """
+
+    def getIncomeClass(self, mID):
+        checker = "SELECT icName FROM incomeclass WHERE mID = ?"
+        self.cursor.execute(checker, (mID))
+        icresult = self.cursor.fetchone()
+        if icresult is not None:
+            # Extract the first element of the tuple (the province name)
+            icName = icresult[0]
+            
+            # Print the province name
+            print(icName)
+            
+            # Return the province name
+            return icName
+        else:
+            print(f"No province found with pID: {pID}")
+            return None
+            
+
         
     def clear(self, e):
         window['PROVINCE'].update('')
@@ -138,9 +229,9 @@ header_frame = [[sg.Text("SGLG Regional Monitoring and Compliance Tracking Syste
 provinces = ('Agusan Del Norte','Agusan Del Sur','Surigao Del Norte','Surigao Del Sur','Province of Dinagat Islands')
 
 #LOCALITY FRAME
-locality = [[sg.Text("Province: ",size=12),sg.Combo(provinces,key='PROVINCE',enable_events=True,size=23)],
-            [sg.Text("City/Municipality: ",size=12),sg.Combo([],key='CM',size=23,enable_events=True)],
-            [sg.Text("Income Class: ",size=12),sg.InputText(key='INCOME_CLASS',size=24,disabled=True)],
+locality = [[sg.Text("Province: ", size=12), sg.Input(default_text=sglg_instance.getProvince(pID), key='PROVINCE', size=23, disabled=True)],
+            [sg.Text("City/Municipality: ",size=12),sg.Input(default_text=sglg_instance.getMunicipality(mID), key='PROVINCE', size=23, disabled=True)],
+            [sg.Text("Income Class: ",size=12),sg.InputText(default_text=sglg_instance.getIncomeClass(mID), key='INCOME_CLASS',size=24,disabled=True)],
             [sg.Text("Field Officer: ",size=12),sg.InputText(key='FIELD_OFFICER',size=24,disabled=True)]]
 
 #CATEGORIES
@@ -229,11 +320,12 @@ while True:
     if event == "PROVINCE":
         municipalities = SGLG()
         province = values['PROVINCE']
-        result_mun = municipalities.get_municipalities(province)
+        print(province, "this is from event province")
+        """ result_mun = municipalities.getData(province)
         if result_mun:
             window["CM"].update(values=result_mun)
         else:
-            sg.popup("Province not Found.")
+            sg.popup("Province not Found.") """
 
         #municipalities = SGLG()
         #province = values['PROVINCE']
