@@ -14,7 +14,15 @@ pID = arguments[2] if len(arguments) > 2 else None
 mID = arguments[3] if len(arguments) > 3 else None
 
 #
-munName = []
+auditOpinion = ''
+coareco = ''
+percentageOfFullyCompliedReco = ''
+oneDropdown = ''
+lguFullyComplied = ''
+averageLRG = ''
+utilization = ''
+beneficiaryOfPCF = ''
+yesPCF = ''
 
 
 #ACTIONS SECTION
@@ -191,7 +199,7 @@ class SGLG:
             return "Error. No field officer."
         
     def emptyLocality(self):
-        if values['PROVINCE'] == "":
+        """ if values['PROVINCE'] == "":
             sg.PopupError('Please Select Province!')
         elif values['CM'] == "":
             sg.PopupError("Please Select City/Municipality!")
@@ -199,14 +207,14 @@ class SGLG:
             sg.PopupError('Empty Income Class. Please select Province first!')
         elif values['FIELD_OFFICER'] == "":
             sg.PopupError('Empty Field Officer. Please select Province first!')
-        else:
-            frInstance = financialReq(self.conn)
-            cat1_1 = frInstance.controllerFinancialReq(province, cm)
-            if cat1_1 == True:
-                window["FAS_FRAME"].update(visible=True)
-                window["DP_FRAME"].update(visible=False)
-            else:
-                print(cat1_1, "this is else after controllerFinancialReq was called in emptyLocality\n")
+        else: """
+        frInstance = financialReq(self.conn)
+        cat1_1 = frInstance.controllerFinancialReq()
+        #if cat1_1 == True:
+        window["FAS_FRAME"].update(visible=True)
+        window["DP_FRAME"].update(visible=False)
+        #else:
+        #    print(cat1_1, "this is else after controllerFinancialReq was called in emptyLocality\n")
 
     def unEmptyLocality(province, cm):
         print(province, cm, "this is from unEmptyLocality")
@@ -328,7 +336,8 @@ while True:
             #check if tama ba ang gipasa nga value
             print("Similar incomeclass")
             #call the function nga mudisplay sa 5th class nga view
-
+            sglgInstance = SGLG()
+            cat1 = sglgInstance.emptyLocality()
 
     if event == "2":
         cat1 = SGLG.emptyLocality()
@@ -384,12 +393,25 @@ while True:
             print("Error. No field officer.")
 
 # FAS 1.1 SECTION
-    if event == "Unmodified":
+    """ if event == "Unmodified":
         fo = values['FIELD_OFFICER']
-        print(cm, fo, "kuan ni")
+        print("unmodified is chosen")
         #fr_instance = financialReq()
-        cat1_1 = financialReq.handle_unmodified(event, values, cm, fo)
-    elif event == "Qualified":
+        cm = sglg_instance.getMunicipality(mID)
+        munName = cm
+        #print(munName, "---------------------munName variable")
+        print(cm, "this is from unmodified button")
+        cat1_1 = financialReq.handle_unmodified(event, values, cm)
+        #cat1_1 = financialReq.get_answers(munName)
+        print("handle unmodified performed") """
+    if event in ["Unmodified", "Qualified", "ADVERSE", "DNO", "NAAR"]:
+        # One event in handling buttons
+        print(f"Radio button selected: {event}")
+        cm = sglg_instance.getMunicipality(mID)
+        auditOpinion = event
+        print("above is the audit opinion", auditOpinion)
+        
+    """ elif event == "Qualified":
         cat1_1 = financialReq.handle_qualified(event, values)
     elif event == "ADVERSE":
         cat1_1 = financialReq.handle_adverse(event, values)
@@ -412,14 +434,23 @@ while True:
     elif event == "NOTOK3":
         cat1_1 = financialReq.handle_notok3(event, values)
     else:
-        print("fas section main not working")
+        print("fas section main not working") """
 
 #FAS 1.1 INPUT TEXT SECTION
     if event == "COA_RECOMMENDATION":
         coa_recommendation = window["COA_RECOMMENDATION"].get()
         res = financialReq.handle_coaRecommendation(event, coa_recommendation)
-        print(res, coa_recommendation, event,  "this is from main event function coa recommendation\n")
+        coareco = res
+        print(coareco,  "this is from main event function coa recommendation\n")
         print("this is main from coa recomendation\n")
+    elif event == "TYPO":
+        print("okay")
+        typo_val = window["TYPO"].get()
+        percentageOfFullyCompliedReco = typo_val
+        print(percentageOfFullyCompliedReco,  "this is from main event function typo\n")
+        """ typo = financialReq.handle_typo(event, typo_val)
+        percentageOfFullyCompliedReco = typo
+        print(type(percentageOfFullyCompliedReco)) """
     else:
         print("COA RECOMMENDATION EVENT IS NOT WORKING")
         

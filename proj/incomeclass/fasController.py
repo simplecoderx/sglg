@@ -1,7 +1,15 @@
 import sqlite3
+import sys, os
+#main_py_path = r'C:/python_playground/project/proj/main.py'
+#conn = main_py_path.conn
+#from ...proj.main import munName as munName
 
-conn2 = sqlite3.connect('SGLG.db')
-cursor = conn2.cursor()
+#from main import munName
+
+storage = []
+
+""" conn2 = sqlite3.connect('SGLG.db')
+cursor = conn2.cursor() """
 
 class financialReq():
     def __init__(self, conn) -> None:
@@ -28,6 +36,7 @@ class financialReq():
                                        "There are unobligated balances that are yet to be reverted back to the National Treasury.",
                                        "The LGU is included in the list of LGUs with pending PCF-funded projects from DILG-BLGD."
                                        )
+        #self.cm = munName
         
     def displayHeadings(self, val):
         print(val)
@@ -44,7 +53,7 @@ class financialReq():
     def displaySectionFiveSubHeadings(self, val):
         return self.sectionFiveSubHeadings[val]
     
-    def controllerFinancialReq(self, province, cm):
+    def controllerFinancialReq(self): #def controllerFinancialReq(self, province, cm):
         """ munWithFinancialReq = ("Nasipit", "Butuan City", "Carmen")
         for i in munWithFinancialReq:
             if cm in munWithFinancialReq:
@@ -53,20 +62,24 @@ class financialReq():
             else:
                 return False """
         print("its working")
-        query = "SELECT COUNT(*) FROM CATEGORIES WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
+        """ query = "SELECT COUNT(*) FROM CATEGORIES WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
         self.cursor.execute(query, (cm,))
         count = self.cursor.fetchone()[0]
-        return count > 0
+        return count > 0 """
             
-    def handle_unmodified(e, val, cm, fo):
-        print(e, val["Unmodified"], cm, fo)
+    def handle_unmodified(e, val, cm):
+        """ print(e, val["Unmodified"], cm)
         unmodified_value = val.get("Unmodified")  # Get the value from the Unmodified radio button
-        print(e, unmodified_value, cm, fo)
+        print(e, unmodified_value, cm)
         # Add your logic here for handling the Unmodified event
         query = "INSERT INTO FINANCIAL_AD_ANS (auditOpinion) VALUES (?)"
         cursor.execute(query, (unmodified_value,))
         print("Successfully inserted into the table.")
-        conn2.commit()
+        conn.commit() """
+        print("this is handle unmodified")
+        print(e, val["Unmodified"], cm)
+        storage = val
+        print(storage, "this is storage")
 
     def handle_qualified(e, val):
         print(e, val["Qualified"])
@@ -115,6 +128,10 @@ class financialReq():
         print(e, val) 
         coa_recommendation = val
         return coa_recommendation
+    
+    def get_answers(self, auditopinion, percentageOfFullyCompliedReco, oneDropdown, lguFullyComplied, averageLRG, utilization, beneficiaryOfPCF, yesPCF):
+    #def get_answers(self):
+        print(self.cm, "this is get answers")
 
 """     def unEmptyLocality(province, cm):
         print(province, cm, "this is from unEmptyLocality of fass") """
