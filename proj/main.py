@@ -65,7 +65,7 @@ class SGLG:
 
 
     def get_cm(self, mun):
-        query = "SELECT icName FROM INCOMECLASS WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
+        query = "SELECT icName FROM INCOMECLASS WHERE munID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
         self.cursor.execute(query, (mun,))
         cm = self.cursor.fetchone()
         if cm:
