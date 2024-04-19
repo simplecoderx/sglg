@@ -1,16 +1,21 @@
 import PySimpleGUI as sg
 import sqlite3
 import sys
-from fasFrontend import FAS
-from fasController import financialReq
+""" from fasFrontend import FAS """
+""" from fasController import financialReq """
 from DP import DP
 from minimum_requirements import mr
-
+from incomeclass.fasFrontendHUC import FAS
+from incomeclass.fasController import financialReq
 #
 arguments = sys.argv
 UId = arguments[1] if len(arguments) > 1 else None
 pID = arguments[2] if len(arguments) > 2 else None
 mID = arguments[3] if len(arguments) > 3 else None
+
+#
+munName = []
+
 
 #ACTIONS SECTION
 class SGLG:
@@ -56,8 +61,7 @@ class SGLG:
 
     def getMunicipality(self, mName):
         checker = "SELECT COUNT(*) FROM municipality WHERE pID = ? AND mID = ?"
-        self.cursor.execute(checker, (pID, mID))
-            
+        self.cursor.execute(checker, (pID, mID))   
         # Fetch the count result from the query
         count = self.cursor.fetchone()[0]
         if count > 0:
@@ -74,8 +78,9 @@ class SGLG:
             if result is not None:
                 # Extract the first element of the tuple (the province name)
                 mName = result[0]
-                icquery = "SELECT icName FROM incomeclass WHERE mID = ?"
+                icquery = "SELECT icName FROM incomeclass WHERE munID = ?"
                 self.cursor.execute(icquery, (mID,))
+                munName = [mName]
                 # Print the province name
                 print(mName)
                 
@@ -96,7 +101,7 @@ class SGLG:
         mName = self.cursor.fetchone() """
 
     def getIncomeClass(self, mID):
-        checker = "SELECT icName FROM incomeclass WHERE mID = ?"
+        checker = "SELECT icName FROM incomeclass WHERE munID = ?"
         self.cursor.execute(checker, (mID))
         icresult = self.cursor.fetchone()
         if icresult is not None:
@@ -112,6 +117,18 @@ class SGLG:
             print(f"No province found with pID: {pID}")
             return None
             
+
+    def checker(self, mID, pID, UId):
+        checker = "SELECT munID, iID from INCOMECLASS WHERE munID = ?"
+        self.cursor.execute(checker, (mID))
+        icresult = self.cursor.fetchone()
+        print(icresult, "THIS IS FROM CHECKER, icresult")
+        if mID == icresult:
+            print(mID, "THIS IS FROM CHECKER, MID")
+        else:
+            print(type(icresult), "this is icresult type")
+            print(mID, icresult, "THIS IS FROM icresult, MID")
+
 
         
     def clear(self, e):
@@ -156,7 +173,7 @@ class SGLG:
 
 
     def get_cm(self, mun):
-        query = "SELECT icName FROM INCOMECLASS WHERE mID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
+        query = "SELECT icName FROM INCOMECLASS WHERE munID IN (SELECT mID FROM MUNICIPALITY WHERE MName = ?)"
         self.cursor.execute(query, (mun,))
         cm = self.cursor.fetchone()
         if cm:
@@ -300,9 +317,19 @@ while True:
     if event == "CLEAR":
         a = SGLG.clear("",event)
     if event == "1":
-        cm = values["CM"]
+        """ cm = values["CM"] """
         sglgInstance = SGLG()
-        cat1 = sglgInstance.emptyLocality()
+        cat1 = sglgInstance.getIncomeClass(mID)
+        """ cat2 = sglgInstance.checker(mID, pID, UId)
+        print(cat1, "this is cat1")
+        print(cat2, "this is cat2")
+        checker = "SELECT Pname FROM province WHERE pID = ?" """
+        if cat1 == '5th Class':
+            #check if tama ba ang gipasa nga value
+            print("Similar incomeclass")
+            #call the function nga mudisplay sa 5th class nga view
+
+
     if event == "2":
         cat1 = SGLG.emptyLocality()
 

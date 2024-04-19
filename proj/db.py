@@ -56,7 +56,7 @@ cursor = conn.cursor()
     )''')  """
 
 #CREATE USERS TABLE
-cursor.execute('''
+""" cursor.execute('''
     CREATE TABLE IF NOT EXISTS USERS (
         UId INTEGER PRIMARY KEY,    -- Unique identifier for each user
         UName TEXT NOT NULL,        -- Username, required and of type text
@@ -66,9 +66,20 @@ cursor.execute('''
         FOREIGN KEY (provinceId) REFERENCES PROVINCE(pID),  -- Foreign key constraint referencing PARENT_TABLE and PId
         FOREIGN KEY (municipalityId) REFERENCES MUNICIPALITY(mID)   -- Foreign key constraint referencing MENTOR_TABLE and MId
     )
+''') """
+
+
+# RENAME MUNICIPALITY table column mID
+""" cursor.execute('''ALTER TABLE INCOMECLASS
+RENAME COLUMN mID TO munID;
+''') """
+
+# Adding new MUNICIPALITY table column
+cursor.execute('''ALTER TABLE INCOMECLASS
+RENAME COLUMN mID TO munID;
 ''')
 
-
+                  
 # Commit changes to the database
 conn.commit()
 
